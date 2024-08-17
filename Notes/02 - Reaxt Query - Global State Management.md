@@ -615,3 +615,105 @@ const LoginStatus = () => {
 PS: Already did that in the first exercice (Check: Creating a Custom Provider)
 
 # Organizing Code for Scalability and Maintainability
+
+Let's talk about how we can organize our code to make it more scalable and maintainable. Currently, we have different building blocks to work with tasks: a context, a custom hook, a reducer, and two components—TaskList and TasksProvider. These building blocks are closely related, but they're scattered throughout our project. To make our code more modular and maintainable, we should encapsulate them within a module or a package, meaning a directory.
+
+Let me give you an analogy. You don't want your kitchenware to be scattered across different rooms in your house, right? Instead, you keep them all together in your kitchen, where they're easily accessible and organized. Similarly, we want to keep all the elements for working with tasks in one place by encapsulating them within a module or a package. This way, we can easily import and use them in different parts of our application. This also makes our code more** modular, scalable, and maintainable.**
+
+So now we want to move all these building blocks to a single folder called "tasks." Let's add a new folder here called "tasks" and then move these one by one. So here's our reducer. Let's move it and update the import. Next, we move our custom hook. Then we move our context, And finally, the two components TaskList and TasksProvider.
+
+```cmd
+<!-- package or module structure -->
+- tasks
+  |_ TaskList.tsx
+  |_ tasksContext.ts
+  |_ TasksProvider.tsx
+  |_ tasksReducer.ts
+  |_ useTasks.ts
+```
+
+So now all the building blocks for working with tasks are in a single place, but we are not done yet. If you have seen my other courses, you have probably heard me talking about the design of a remote control. That's one of my favorite examples. A remote control has a bunch of buttons on the outside and a complex electronic board on the inside. What is inside is irrelevant to us as the users or consumers of our remote control. All we care about are the buttons on the outside. With this design, the manufacturer of a remote control can easily change the internals without affecting us, as long as all those buttons we are used to are still on the outside. These buttons represent the public interface of a remote control. What is inside is called an **implementation detail**.
+
+Now we want to apply this principle to our tasks package, so we want to hide certain pieces that are about implementation and expose only the parts that the consumers need. Pthink about it for a minute: What pieces or what building blocks are implementation details?
+
+Here's the answer: In this package, we only need to expose two files, TaskList and TasksProvider. These are the components that we need to import in other parts of our application; everything else is considered implementation detail.
+
+For example, the tasks reducer. In this reducer file, we have the logic for managing the state of our tasks. The only place where we have used this is in our provider. This is the only place where we use this reducer. If we import the TasksProvider component somewhere else in the application, we don't need to work with this reducer directly. So to take this application to the next level, I'm going to go into this reducer file and bring all the code into the TasksProvider file. Let's go to the tasks reducer, select all the code, cut it, and then put it in TasksProvider. Now, paste all the code before the props interface because I want this interface to be close to this component. So let's paste the code. Now we don't need to export the tasks reducer.
+
+```tsx
+// TasksProvider.tsx
+import { ReactNode, useReducer } from "react";
+import TasksContext from "./TasksContext";
+
+// we moved this interface from the component to our reducer
+export interface Task {
+  id: number;
+  title: string;
+}
+
+// we defined two interfaces to cover both type of actions
+// like that each interface has a different type of payload
+interface AddTask {
+  type: "ADD";
+  task: Task;
+}
+interface DeleteTask {
+  type: "DELETE";
+  taskId: number;
+}
+export type TaskAction = AddTask | DeleteTask;
+
+// we renamed "state" to "tasks" for clarity
+const taskReducer = (tasks: Task[], action: TaskAction): Task[] => {
+  // we used a switch statement instead o bunch of if statements
+  switch (action.type) {
+    case "ADD":
+      return [action.task, ...tasks];
+    case "DELETE":
+      return tasks.filter((task) => action.taskId !== task.id);
+
+    default:
+      return tasks;
+  }
+};
+
+// no need to export taskReducer
+// export default taskReducer;
+
+interface Props {
+  children: ReactNode;
+}
+function TaskProvider({ children }: Props) {
+  const [tasks, dispatch] = useReducer(taskReducer, []);
+
+  return (
+    <TasksContext.Provider value={{ tasks, dispatch }}>
+      {children}
+    </TasksContext.Provider>
+  );
+}
+
+export default TaskProvider;
+```
+
+So in this module, we have all the building blocks for managing the state of tasks. Some of these building blocks are private because we haven't exported them. The other parts are public, like **TaskActionType** as well as **TasksProvider**. Here, we have a compilation error at the top. Let's take a look. We're trying to import tasksReducer. This line is no longer needed. Now for our context, we should import it from the current directory. Also, we don't need to import React. Good. Now you can delete the tasksReducer file.
+
+Okay, so we're done with this module. Now let's talk about our custom hook for accessing tasks. Currently, the only place where we need this hook is inside the TaskList component, right here. So we don't need to define this hook in a separate file and then import it; we can simply grab the line where we define the **useContext** and implement it in the TaskList component. Now, we wouldn't do this if there were other components that used this hook. This is based on our current implementation. There is no **`one-size-fits-all`** solution. That's what I want you to take away from this lesson. We don't want to follow a particular structure as a best practice and apply it to every project.
+
+So let's move on. we need to import the context hook and TasksContext in TaskList component. With this, we don't need the **useTasks** file anymore, we'll delete it and simplify our project structure. we're also importing the **useTasks** hook, Let's remove this line as well.
+
+```tsx
+
+```
+
+Now, with this structure, you might argue that it will be harder to find these building blocks. Previously, we used Command + P on Mac or Control + P on Windows to look up a file by its name, like taskReducer, but that reducer is not in a separate file now. So how can we find it? Very easily. Instead of Command + P, we use Command + T. With this, we can look up any symbol in our project. Here, we can look up taskReducer or useTasks.
+
+Okay, now let's build our project to make sure we haven't broken anything. So we bring up the command palette and build. Okay, we have three errors that we have to fix. One error is in TasksContext on line three. Let's go there. Now we should import these types from TasksProvider.
+
+Now let's look at the next error. The next one is in App.tsx. Here, we need to import TasksProvider, but I have a better solution for this. Instead of directly importing this component from this file, we want to add an index file to our package. So here, we add index.ts and expose the parts that represent only the public interface of this package. We need to import TasksProvider and then export it like this. Similarly, we need to import TaskList and then export it.
+
+Now, there is a better way to do this. We can combine these import and export statements. So instead of importing TasksProvider and then exporting it, we can import and export it in one go. So here, we can export default as TasksProvider from "TasksProvider." With this, we can remove the import statement. Similarly, we can export default as TaskList from "TaskList." So with this, we are saying that we want to export the default object that is imported from this module under this name.
+
+Okay, so this is the index of our package. Now back to our App component. We delete this line and import TasksProvider from "state-management/tasks." Here, we have another error for importing the reducer, but that is not needed, so let's organize our imports. Lovely.
+
+Now, let's build our application one more time to make sure we haven't broken anything. Okay, beautiful. So with this structure, we are not exposing the implementation details of the tasks package. That means if we decide to change the implementation in the future, we only need to modify the code in this package. Our changes are not going to impact the rest of the application. For example, if we go into the TasksProvider and decide to replace this reducer with something else, we only need to modify this file and potentially a few other files in this package. Other parts of our application will not be affected because they don't care how we manage the state internally. Are we using the reducer row? Are we using the state code? Are we using a state management library? All of this is implementation detail and shouldn't be exposed outside of this package.
