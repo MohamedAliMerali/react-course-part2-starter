@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { Task, TaskAction } from "../reducers/tasksReducer";
+import { Task, TaskAction } from "./TaskProvider";
 
 export interface TasksContextType {
   tasks: Task[];

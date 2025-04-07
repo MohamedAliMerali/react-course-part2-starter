@@ -12,6 +12,7 @@ const useAddTodo = (onAdd: () => void) => {
   // ps: here will get a missleading error on the mutation function
   // the real reason for this error is 'onMutate' function.
   return useMutation<Todo, Error, Todo, AddTodoContext>({
+    // PS: AddTodoContext is for the context down below in 'onMutate' func
     mutationFn: todoService.post,
 
     // onMutate callback is used to create optimistic updates
@@ -59,7 +60,7 @@ const useAddTodo = (onAdd: () => void) => {
       );
     },
     // in case of an error, we should restore the UI to the prv state
-    // PS: context is an pbject that we create to pass data in between
+    // PS: context is an object that we create to pass data in between
     // our callbacks, here we need a context object that includes the
     // prvs todos before we updated the cache, we should create
     // the context and return it in the 'onMutate' callback so we can

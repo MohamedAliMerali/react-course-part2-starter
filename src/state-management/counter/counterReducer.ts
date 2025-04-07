@@ -1,3 +1,5 @@
+// PS: no need for that when working with zustand
+
 // properties needs to be annotated, the state var type is the same as
 // our original state, and the type of action has no specific type
 // but with convention we use an object with a type property that describes the action

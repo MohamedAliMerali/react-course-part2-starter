@@ -1,4 +1,4 @@
-http://localhost:5173/# Fetching and Updating Data with React Query (3h)
+# Fetching and Updating Data with React Query (3h)
 
 ## Part 2: Mutating data
 
@@ -39,7 +39,7 @@ import {
 // ...
 
 const TodoForm = () => {
-  // queryClient: the query clinet that we created at the beginninng of the section, we used it here to mutate data
+  // queryClient: the query clinet that we created at the beginning of the section, we used it here to mutate data
   const queryClient = useQueryClient();
   // addTodo is a mutation object
   const addTodo = useMutation({
@@ -75,7 +75,6 @@ const TodoForm = () => {
       onSubmit={(event) => {
         event.preventDefault();
         // prevent submiting the form to the server
-
         // ref.current may be undefined which isn't assignable to type string, that's why we need this test
         if (ref.current && ref.current.value)
           addTodo.mutate({
@@ -157,7 +156,7 @@ PS: in React query a variables refers to the input, the data that we send to the
 
 Next we implement **onError**, we used the prvs todos of context to update the query cache.
 
-if the request is **successful**, we replace the newTodo with the saved Todo that we get from the backend.
+if the request is **successful**, we replace the newTodo with the savedTodo that we get from the backend.
 
 - Here's the code for that:
 
@@ -181,6 +180,7 @@ const TodoForm = () => {
   // ps: here will get a missleading error on the mutation function
   // the real reason for this error is 'onMutate' function.
   const addTodo = useMutation<Todo, Error, Todo, AddTodoContext>({
+    // PS: AddTodoContext is for the context down below in 'onMutate' func
     mutationFn: (todo: Todo) =>
       axios
         .post<Todo>("https://jsonplaceholder.typicode.com/todos", todo)
@@ -216,7 +216,7 @@ const TodoForm = () => {
       // used as a generic type in mutation hook said that the property
       // is a todo array and not undefined.
       //
-      // to fix this, where we return the prvsData, if ot's undefined we
+      // to fix this, where we return the prvsData, if it's undefined we
       // should return an empty Array
     },
     // moreover, we have to handle the success and the errors scenario
@@ -228,7 +228,7 @@ const TodoForm = () => {
       );
     },
     // in case of an error, we should restore the UI to the prv state
-    // PS: context is an pbject that we create to pass data in between
+    // PS: context is an object that we create to pass data in between
     // our callbacks, here we need a context object that includes the
     // prvs todos before we updated the cache, we should create
     // the context and return it in the 'onMutate' callback so we can
@@ -291,13 +291,15 @@ we'll do that using a callback function, so our component is gonna pass a functi
 ```tsx
 // our Hook
 const useAddTodo = (onAdd: () => void) => {
-  // .
-  // .
+  // ..
+  // ...
   // after getting the data
   // if (ref.current) ref.current.value = "";
   onAdd();
 
   return { prvsTodos };
+  // ..
+  // ...
 };
 ```
 
@@ -560,7 +562,7 @@ class APIClient<T> {
     return axiosInstance.get<T[]>(this.endpoint).then((res) => res.data);
   };
 
-  // post is a generic method that take objects  of type T
+  // post is a generic method that take objects of type T
   post = (data: T) => {
     return axiosInstance.post<T>(this.endpoint, data).then((res) => res.data);
   };
@@ -619,7 +621,7 @@ const useAddTodo = (onAdd: () => void) => {
 
 # Creating a Reusable HTTP Service
 
-We hve duplicated our endpoint in 2 different places, to solve this problem, we should create a sinlg instance of our api client for working with todos.
+We have duplicated our endpoint in 2 different places, to solve this problem, we should create a sinlg instance of our api client for working with todos.
 
 we add new file in service called **todoService.ts**, that's where we're going to create a single instance of our apiClient using the same code we used erlier and then we export it.
 
@@ -644,7 +646,7 @@ PS: don't forget to import the Todo interface.
 
 ```tsx
 // useTodos
-// we cahnge the import statement
+// we change the import statement
 import todoService, { Todo } from "../services/todoService";
 
 const useTodos = () => {
@@ -678,13 +680,13 @@ const useAddTodo = (onAdd: () => void) => {
 
 Let's take a closer look at the pieces in our apllication and how they work together.
 
-![Application Layers](Application%20Layers.png)
+![Application Layers](./images/Application%20Layers.png)
 
 **API Clinet:** The botton layer, Handle HTTP request for the backend.
 
-**HTTP Services:** Instances of our API Client dedicating to working with specific type of objects. for exp we have a todo service for working with todos, we cal also have a post service for working with posts.
+**HTTP Services:** Instances of our API Client dedicating to working with specific type of objects. for exp we have a todo service for working with todos, we can also have a post service for working with posts.
 
-**Custom Hooks:** Above those layers we have this costum hook, which use HTTP Servies to fetch and update Data, in these hooks we have all the logic for managin data in the cache.
+**Custom Hooks:** Above those layers we have this costum hook, which use HTTP Servies to fetch and update Data, in these hooks we have all the logic for managing data in the cache.
 
 **Component:** at the top we have our component whcih use our hooks to fetch and update data.
 

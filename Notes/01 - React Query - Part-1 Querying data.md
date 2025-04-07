@@ -26,7 +26,7 @@
 
 but why using it? let's see...
 
-This is how we typically fetch data from the back end in a React application. There are a number of problems in this implementation!
+This is how we typically fetch data from the back-end in a React application. There are a number of problems in this implementation!
 
 ```tsx
 useEffect(() => {
@@ -62,7 +62,7 @@ Another limitation is that there is no automatic refresh. So if the data changes
 
     There is no caching? but What is caching? Caching: is the process of storing data in a place where it can be accessed more quickly and efficiently in the future.
 
-For example, in our React applications, we can store frequently used data on the client meaning inside the user's browser, so we don't have to fetch it from the server every time it's needed, this can greatly improve the performance of our applications.
+For example, in our React applications, we can store frequently used data on the client's browser, meaning inside the user's browser, so we don't have to fetch it from the server every time it's needed, this can greatly improve the performance of our applications.
 
 Now, we can address all these limitations by writing more and more code but there's a lot of extra code that we have to maintain. This is where **`react query`** comes into play.
 
@@ -72,7 +72,7 @@ Now, a lot of people use **Redux** for caching, it's a popular state management 
 
 Now, the problem with Redux is that it can be very complex and difficult to learn, especially for new developers. Plus, it requires a lot of boilerplate code and makes your applications more difficult to debug and maintain.
 
-React quarry on the other hand, is a lot simpler and more lightweight. So Redux is no longer needed, in a lot of cases, at least for caching.
+React Query on the other hand, is a lot simpler and more lightweight. So Redux is no longer needed, in a lot of cases, at least for caching.
 
 If you have to maintain an older project that uses Redux first, see if you can replace it with React Query.
 
@@ -108,11 +108,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 
 To fetch data with react Query we use Query hook that is defined in "tanstack/react-query". we give a configuration object with 2 properties, **`queryKey`** and **`queryFn`**
 
-- **queryKey**: Unique identifier for the query, it is used internally for caching, anytime we retrieve a piece of data from the backend, the data is stored in the cache, and it will be accessible via this key, we set it to an array of one or more values, 1st one is usualy a string that identifies the type of data we wanna store here(todos in this case). we can have additional values(for exp: completed for storing completed todos, we can also have an object with completed set to true, depends on what you need).
+- **queryKey**: Unique identifier for the query, it is used internally for caching, anytime we retrieve a piece of data from the backend, the data is stored in the cache, and it will be accessible via this key, we set it to an array of one or more values, 1st one is usualy a string that identifies the type of data we wanna store here(todos in this case). we can have additional values(for exp: "completed" for storing completed todos, we can also have an object with completed set to true, depends on what you need).
 
 - **`queryFn`**: This is the function that we use to fetch the data from the backend, this function should return a promise that resolve to data or throw an error.
 
-        PS: you can use any http library. React query only concerns with managing and caching data.
+        PS: you can use any HTTP library. React query only concerns with managing and caching data.
 
 ```tsx
 const fetchTodos = () => {
@@ -131,7 +131,7 @@ const query = useQuery({
 });
 ```
 
-that **query** object has bunch of properties like: Data, errors, isLoading and so on, since we're interested only in the data property we can destructure the object.
+That **query** object has bunch of properties like: Data, errors, isLoading and so on, since we're interested only in the data property we can destructure the object.
 
 with this implementation we no longer need the state hook to declare state variables for our data and errors, we don't need the effect hook too.
 
@@ -153,7 +153,7 @@ return (
 );
 ```
 
-PS: With this implementation we get some benifits such as **`Automatics retries`**, **`Auto refetch`** and **`caching`**, we can configure all of those.
+PS: With this implementation we get some benefits such as **`Automatics retries`**, **`Auto refetch`** and **`caching`**, we can configure all of those.
 
 # Handling Errors
 
@@ -322,7 +322,7 @@ One of the beautiful things about React query is that it automatically refreshes
 - **refetchOnMount**: means our queries should be fetch when a component mounts for the first time.
 - **keepPreviousData**: keep the previous data until the new data arrives.
 
-Most of the time, we don't really need to change these settings, the default values work well for most cases, the only setting that we often need to customise is the stale time and this is dependent on our case, some pieces of data get updated less frequently.
+Most of the time, we don't really need to change these settings, the default values work well for most cases, the only setting that we often need to customize is the stale time and this is dependent on our case, some pieces of data get updated less frequently.
 
 For this we can configure stale time per query:
 

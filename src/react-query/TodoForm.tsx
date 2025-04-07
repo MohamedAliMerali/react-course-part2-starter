@@ -1,12 +1,6 @@
-import {
-  QueryClient,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
 import { useRef } from "react";
-import { Todo } from "./hooks/useTodos";
-import axios from "axios";
 import useAddTodo from "./hooks/useAddTodo";
+import { Todo } from "./services/todoService";
 
 interface AddTodoContext {
   prvsTodos: Todo[];
@@ -28,6 +22,7 @@ const TodoForm = () => {
         onSubmit={(event) => {
           event.preventDefault();
 
+          console.log("adding todo");
           if (ref.current && ref.current.value)
             addTodo.mutate({
               id: 0, // generated on the server
@@ -35,6 +30,7 @@ const TodoForm = () => {
               userId: 1, // just an example
               completed: false,
             });
+          else console.log("empty todo");
         }}
       >
         <div className="col">

@@ -2,14 +2,15 @@
 
 ## Content
 
-- Consolidating State Logic with a Reducer
+- Consolidating State Logic with a Reducer!!
+<!-- idk why i put that here -->
 
 ## Keywords
 
 - State/actions
 - Context / Prop drilling
 - React.createContext / TasksContext.provider
--
+- Redux / Zustand
 
 # Consolidating State Logic with a Reducer
 
@@ -584,7 +585,7 @@ With this implementation our code is cleaner, more modular and reusable, if we d
 
 # Creating a Hook to Access Context
 
-Jiust like we can create a custom provider, we can create a custom hook for accessing a given context, we have seen this technique before in react qeury and probably many other libraries, in react query we have custom hook caled QueryClient to access teh shared query client, we can use the same technique here to access the **AuthContext**.
+Just like we can create a custom provider, we can create a custom hook for accessing a given context, we have seen this technique before in react qeury and probably many other libraries, in react query we have custom hook caled QueryClient to access the shared query client, we can use the same technique here to access the **AuthContext**.
 
 We first add a new folder called **hooks** with a new file called **useAuth.ts**, we define a function whcih in its body we call the Context hook and provide **AuthContext**.
 
@@ -703,17 +704,130 @@ Okay, so we're done with this module. Now let's talk about our custom hook for a
 So let's move on. we need to import the context hook and TasksContext in TaskList component. With this, we don't need the **useTasks** file anymore, we'll delete it and simplify our project structure. we're also importing the **useTasks** hook, Let's remove this line as well.
 
 ```tsx
+import { useContext } from "react";
+import TasksContext from "./TasksContext";
 
+const useTasks = () => useContext(TaskContext);
+
+const TaskList = () => {
+  const { tasks, dispatch } = useTasks();
+
+  //...
+  //...
+  //...
+};
+
+export default TaskList;
 ```
 
-Now, with this structure, you might argue that it will be harder to find these building blocks. Previously, we used Command + P on Mac or Control + P on Windows to look up a file by its name, like taskReducer, but that reducer is not in a separate file now. So how can we find it? Very easily. Instead of Command + P, we use Command + T. With this, we can look up any symbol in our project. Here, we can look up taskReducer or useTasks.
+Now, with this structure, you might argue that it will be harder to find these building blocks. Previously, we used **Command + P** on Mac or **Control + P** on Windows to look up a file by its name, like taskReducer, but that reducer is not in a separate file now. So how can we find it? Very easily. Instead of **Command + P**, we use **Command + T**. With this, we can look up any symbol in our project. Here, we can look up **taskReducer** or **useTasks**.
 
-Okay, now let's build our project to make sure we haven't broken anything. So we bring up the command palette and build. Okay, we have three errors that we have to fix. One error is in TasksContext on line three. Let's go there. Now we should import these types from TasksProvider.
+Okay, now let's build our project to make sure we haven't broken anything. So we bring up the command palette and build with `npm run build`.
 
-Now let's look at the next error. The next one is in App.tsx. Here, we need to import TasksProvider, but I have a better solution for this. Instead of directly importing this component from this file, we want to add an index file to our package. So here, we add index.ts and expose the parts that represent only the public interface of this package. We need to import TasksProvider and then export it like this. Similarly, we need to import TaskList and then export it.
+We have three errors that we have to fix. One error is in TasksContext on line three. Let's go there. Now we should import these types from TasksProvider.
 
-Now, there is a better way to do this. We can combine these import and export statements. So instead of importing TasksProvider and then exporting it, we can import and export it in one go. So here, we can export default as TasksProvider from "TasksProvider." With this, we can remove the import statement. Similarly, we can export default as TaskList from "TaskList." So with this, we are saying that we want to export the default object that is imported from this module under this name.
+```ts
+import { Task, TaskAction } from "./taskReducer";
+```
 
-Okay, so this is the index of our package. Now back to our App component. We delete this line and import TasksProvider from "state-management/tasks." Here, we have another error for importing the reducer, but that is not needed, so let's organize our imports. Lovely.
+Now let's look at the next error. The next one is in App.tsx. Here, we need to import TasksProvider, but there is a better solution for this. Instead of directly importing the `TasksProvider`, we want to add an index file to our package. we create **index.ts** and expose the parts that represent only the public interface of this package. We need to import **TasksProvider** and then export it. Similarly, we need to import **TaskList** and then export it.
 
-Now, let's build our application one more time to make sure we haven't broken anything. Okay, beautiful. So with this structure, we are not exposing the implementation details of the tasks package. That means if we decide to change the implementation in the future, we only need to modify the code in this package. Our changes are not going to impact the rest of the application. For example, if we go into the TasksProvider and decide to replace this reducer with something else, we only need to modify this file and potentially a few other files in this package. Other parts of our application will not be affected because they don't care how we manage the state internally. Are we using the reducer row? Are we using the state code? Are we using a state management library? All of this is implementation detail and shouldn't be exposed outside of this package.
+```tsx
+import { TaskProvider } from "./TaskProvider";
+import { TaskList } from "./TaskList";
+
+export { TaskProvider };
+export { TaskList };
+```
+
+There is a better way to do this. We can combine these import and export statements. So instead of importing TasksProvider and then exporting it, we can import and export it in one go.
+
+```tsx
+export { default as TaskProvider } from "./TaskProvider";
+export { default as TaskList } from "./TaskList";
+```
+
+Okay, so this is the index of our package. Now back to our App component. We delete the import statement and import **TasksProvider** from "state-management/tasks." Here, we have another error for importing the reducer, but that is not needed, so let's us just organize our imports, Now, let's build our application one more time to make sure we haven't broken anything.
+
+So with this structure, we are not exposing the implementation details of the tasks package. That means if we decide to change the implementation in the future, we only need to modify the code in this package. Our changes are not going to impact the rest of the application. For example, if we go into the TasksProvider and decide to replace this reducer with something else, we only need to modify this file and potentially a few other files in this package. Other parts of our application will not be affected because they don't care how we manage the state internally. Are we using the reducer row? Are we using the state code? Are we using a state management library? All of this is implementation detail and shouldn't be exposed outside of this package.
+
+## Summary
+
+The tutorial explains how to organize code by encapsulating related components, hooks, and reducers into a single module or package to make the code more modular, scalable, and maintainable. The key steps include:
+
+1. **Moving Related Files:** All files related to tasks (context, custom hook, reducer, and components) are moved into a single "tasks" folder.
+2. **Combining Reducer and Provider:** The reducer code is moved into the `TasksProvider` file, making it an internal implementation detail that doesn't need to be exported or accessed elsewhere.
+
+3. **Simplifying Hook Usage:** The custom hook, previously in a separate file, is integrated directly into the `TaskList` component since it’s only used there.
+
+4. **Creating an Index File:** An `index.ts` file is added to the package to expose only the necessary components (`TasksProvider` and `TaskList`) as the public interface, while keeping other implementation details hidden.
+
+**End Result:** The code is now more organized, with all task-related components in one folder, and only the necessary parts are exposed for use in other parts of the application. This structure makes future changes easier and ensures the rest of the application is unaffected by internal modifications.
+
+# Exercice: Organizing Code
+
+Put all the buillding blocks for working the current user in a folder called Auth. also with the counter.
+
+# Splitting Contexts for Efficiency
+
+One thing you need to know about context is every time you change something in a context, all component that use that context will rerender, and that brings us to a very important lesson.
+
+A Context should only hold values that are closely related and tend to change together. in other words, a context should have a single responsibility or a single purpose.
+
+Here's an example: currently, we have two contexts, tasks and auth context.
+
+![navBar context Dependency](./images/navBarDependency.png)
+
+Our navigation component is dependent on both of these contexts and will re-render whenever either the current user or the number of tasks changes. Now, for a second, imagine that we don't want to show the number of tasks on the navigation bar, so our nav bar shouldn't use the tasks context. With this, it will only re-render if the current user changes. However, if we combine these two contexts into a single one, our nav bar will re-render anytime the current user or the tasks change. This is completely unnecessary.
+
+So to minimize unnecessary re-renders, we should split up our contexts into smaller and more focused ones, each having a single responsibility. That's why here we need two separate contexts for sharing tasks and the current user.
+
+Now, as I always say, too much of a good thing can often be a bad thing. You don't want your contexts to be too fine-grained either. For example, I've seen developers creating separate contexts for the state and the dispatch function. There are two problems here. The first problem is that with this approach, our component tree gets overly complex and hard to maintain. Imagine if for every concept, we create two separate contexts—one to share the state, the other to share the dispatch function. Our component tree would quickly grow and get out of control, right?
+
+The second problem is that the concept of tasks and the function for updating them are closely related. So wherever we use the tasks, we probably want to be able to update them as well. These concepts shouldn't be separated in the first place.
+
+So here's the deal: some folks out there abuse React context, and then they go around spreading rumors that it's no good and should be avoided. Don't fall for that nonsense. Just because some folks don't know how to use context properly doesn't mean it's a bad tool. Every tool has a purpose. If you try to use a hammer to fix a computer, you're going to have a bad time. But that doesn't mean that hammers are the enemy. The same goes for React context. When you use it the right way, it can be super helpful for sharing data across your application.
+
+# When to Use Context
+
+One of the questions that people often ask is whether context can replace **Redux**. Before I answer that, let's talk about what Redux is and what problems it aims to solve.
+
+**`Redux`** is a widely used state management library for JavaScript applications. It provides a centralized store to manage application state. Instead of storing local state in our components, we store all the state in a single global store and have each component access the pieces of state that it needs. This way, we don't have to pass data via props through many components in the middle.
+
+![redux centralized States](./images/reduxcentralizedStates.png)
+
+So one of the benefits of using state management tools is that they help us avoid **prop drilling**. **Context** also helps us avoid **prop drilling**, but it's not a state management tool since it doesn't have a way to store and update data. When using context, you store the state somewhere else. So context is just a way to transport and share the state in our application. Comparing context with Redux is like comparing a box with a truck carrying that box. Both React context and Redux allow us to share state in our application, but does context replace Redux? Well, it depends on who you ask.
+
+If you ask **John Smith**, he'll tell you that with Redux, you can do:
+
+- cache the server state.
+- persist it in local storage(so that you can reload it on refresh).
+- your components can select certain pieces of data and re-render only if those values change.
+- undo things.
+- use some middleware to log every action.
+- decouple your application from React (so you can replace it with Angular).
+
+And more importantly, you can see **state changes **over time using **Redux DevTools**. Isn't that awesome?
+
+Now, if you argue that Redux has too much **boilerplate** code and complexity, he’ll come back with that old famous line: "Man, have you used **Redux Toolkit**? It’s gold and helps reduce **boilerplate**."
+
+The problem with this mentality is that people like John are more focused on **tools** and their **features** than the problems they need to solve. As a software engineer, your goal should be to solve problems for businesses and people. If Redux allows you to undo things or log every action, but that's not a requirement in the application you're going to build, you're just increasing complexity by using the wrong tool to solve the problem. It's like the old saying: give a fool a hammer and they will see everything as a nail.
+
+So let's take a step back and understand the problem that most React applications face before we talk about tools as the solutions. Most, if not all, React applications need a way to manage some state that can be **server or client state**. A few years ago, before we had tools like **React Query** or **Zustand**, people started using **Redux** to store both the client and server state in a **single global store**. But Redux brings so much unnecessary complexity. When building applications with Redux, we have to deal with several concepts like:
+
+- store.
+- actions.
+- reducers.
+- dispatch.
+- middleware.
+- selectors.
+- thunks.
+- sagas, and more...
+
+These days, we can manage server state using **React Query**, and we don't have to deal with any of the nonsense that comes with Redux. The only concepts we have to deal with are **queries and mutations**.
+
+But what about the **client state**? Well, once we manage the s**erver state** with React Query, there is actually very little client state left to manage. For simple applications, we can define local state in our components and share it using context. If our state management logic is complex, we can consolidate it using a reducer. But if we're still experiencing unnecessary re-renders and need more control over data management, we can use **`Zustand`**. I believe Zustand is good enough for most applications, but there is no one-size-fits-all. Every project is different.
+
+The reality is, I think **Redux** has served its purpose. There was a time when we didn't have better alternatives, but these days, with React Query and Zustand around, I think Redux is overkill for the majority of applications. So it's time to move on. I know a lot of projects are still using Redux, but just because something is popular doesn't mean it's the best solution. I kind of blame this on online instructors who created courses to teach React with Redux just to show you how to build to-do apps—something completely unnecessary. So a lot of people started using React with Redux, and that's why they're having a hard time divorcing from Redux.
+
+Now, with all that, if you're still in love with Redux and want to make your life more complicated and write more code to get things done, that's totally fine. I can give you John Smith's phone number so you two can hang out and talk about your memories with Redux, day and night.

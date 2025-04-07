@@ -1,10 +1,12 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "bootstrap/dist/css/bootstrap.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import App from "./App";
+import { RouterProvider } from "react-router-dom";
 import "./index.css";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import router from "./routing/routes";
+import App from "./App";
 
 // const queryClinet = new QueryClient({
 //   defaultOptions: {
@@ -19,12 +21,13 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 //   },
 // });
 
-const queryClinet = new QueryClient();
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClinet}>
-      <App />
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+      {/* <App /> */}
       <ReactQueryDevtools />
     </QueryClientProvider>
   </React.StrictMode>

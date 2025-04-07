@@ -15,8 +15,8 @@ class APIClient<T> {
   // using arrow function so we won't lose the *this* context
   // when referencing to this function in our hooks
   getAll = () => {
-    debugger; // to debug when it gets to here
-    return axiosInstance;
+    // debugger; // to debug when it gets to here
+    return axiosInstance.get<T[]>(this.endpoint).then((res) => res.data);
   };
 
   // post is a generic method that take objects  of type T
