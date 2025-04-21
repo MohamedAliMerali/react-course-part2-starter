@@ -571,3 +571,95 @@ const PostList = () => {
   );
 };
 ```
+
+# Infinite scroll
+
+**Objective**: Replace the “Load More” button with an automatic infinite scroll to fetch more game data as the user scrolls down.
+
+---
+
+## **1. Installation**
+
+Install the required library:
+
+```bash
+npm install react-infinite-scroll-component@6.1
+```
+
+---
+
+## **2. Setup in `GameGrid` Component**
+
+Wrap your `SimpleGrid` (the grid displaying games) inside the `InfiniteScroll` component.
+
+**Example:**
+
+```tsx
+<InfiniteScroll
+  dataLength={fetchedGamesCount}
+  hasMore={!!hasNextPage}
+  next={fetchNextPage}
+  loader={<Spinner />}
+>
+  <SimpleGrid>{/* Game Cards */}</SimpleGrid>
+</InfiniteScroll>
+```
+
+---
+
+## **3. `InfiniteScroll` Props Explained**
+
+- **`dataLength`**:
+
+  - Represents how many items we’ve fetched **so far**, not the total count.
+  - Computed by reducing the pages array:
+    ```js
+    const fetchedGamesCount =
+      data?.pages.reduce((total, page) => total + page.results.length, 0) || 0;
+    ```
+
+- **`hasMore`**:
+
+  - Tells the component whether there’s more data to fetch.
+  - Uses `!!hasNextPage` to ensure a proper boolean value.
+
+- **`next`**:
+
+  - A function that fetches the next page:
+    ```js
+    next={() => fetchNextPage()}
+    ```
+
+- **`loader`**:
+  - Shows a spinner while new data is loading:
+    ```js
+    loader={<Spinner />}
+    ```
+
+---
+
+## **4. Cleanup**
+
+- **Remove the “Load More” Button** since infinite scroll replaces it.
+- **Remove unnecessary components** like `Box` that were used to add padding around the button — move padding directly to `SimpleGrid`.
+- **Clean up imports** after removing components.
+
+---
+
+## **5. Caching Optimization**
+
+In your `useGames` hook, set the `staleTime` to prevent refetching data for 24 hours:
+
+```js
+staleTime: 24 * 60 * 60 * 1000, // 24 hours
+```
+
+---
+
+## **6. Final Step**
+
+Commit your changes with a meaningful message:
+
+```bash
+git commit -m "Implement infinite scroll"
+```

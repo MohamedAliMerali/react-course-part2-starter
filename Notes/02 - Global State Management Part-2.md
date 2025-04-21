@@ -18,7 +18,7 @@ const Counter = () => {
   // no need for the reducer anymore, because all the logic for
   // managing the state of our counter, is implemened in our store
 
-  //   const counterStore = useCounterStore();
+  // const counterStore = useCounterStore();
   const { counter, increament, reset } = useCounterStore();
 
   return (
